@@ -1,0 +1,558 @@
+package poker;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+
+
+public abstract class Poker implements HandAnalyzer
+{
+	protected ArrayList<Player> players;
+	
+	protected Deck gameDeck;
+	
+	protected int numPlayers;
+	
+	public Poker()
+	{//** creates two default players, a deck, and shuffles it */
+		players = new ArrayList<Player>();
+				
+		gameDeck = new Deck();
+		gameDeck.shuffleDeck();
+		numPlayers = 0;
+	}
+		
+	public void enterGame(String name, int cash)
+	{
+		// enters player into the game, with some cash
+		Player newPlayer = new Player(name, cash);
+		
+		players.add(newPlayer);
+		System.out.println(name + " entered the game " + " with " + "$" + getPlayer(name).getCash());
+		numPlayers++;		
+		System.out.println("Number of Players: " + numPlayers + "\n");
+	}
+		
+	public void dealCard(String name, Card card)
+	{
+		// can specify which card to give player "name"		
+		getPlayer(name).hand.add(card);
+	}
+		
+	public void dealCard(String name)
+	{
+		// random overload of dealCard above 
+		Player plr = getPlayer(name);
+		plr.hand.add(new Card());
+		System.out.println(plr.name + " was a dealt a Card");
+	}
+		
+	private int isPlayer(String name)
+	{
+		int cnt = 0;
+		
+		findSize:
+		for(int i = 0; 0 < players.size(); i++){
+			
+			if (players.get(i).name == name)
+			{
+				break findSize;
+			}
+			
+			cnt += 1;
+			
+		}
+		
+		return cnt; 
+		
+	}
+		
+	public <T> ArrayList<T> copy(Collection<T> lst) // generic method 
+	{ //** simply returns a copy of ArrayList<?> 
+		
+		ArrayList<T> copy = new ArrayList<T>();
+		
+		for(T obj : lst)
+		{
+			copy.add(obj);
+		}
+		
+		return copy;
+	}
+			
+	@Override
+	public boolean hasPair(String name) 
+	{ // returns true if player has only one pair		
+		Player plyr = getPlayer(name); // reference to player
+		boolean condition = false;					
+		ArrayList<Integer> duplicateRanks = dupRankInd(plyr.getHand());
+		
+					if(duplicateRanks != null && duplicateRanks.size() == 2){
+							condition = true;														
+						}							
+		return condition;
+	}
+
+	@Override
+	public Card[] getPair(String name) 
+	{ // returns Card[] if player name has a pair, else returns null
+		
+		Player plyr = getPlayer(name);		
+		ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+		Card[] hand = new Card[2]; // will hold pair of cards 
+				
+		if (hasPair(name))
+		{	
+			// fill hand for output
+			//System.out.println(plyr.getName() + " has a pair");
+			hand[0] = plyr.getHand().get(handInd.get(0));
+			hand[1] = plyr.getHand().get(handInd.get(1));
+			return hand;
+		}
+		else				
+			return null;
+	}
+
+	@Override
+	public boolean hasTwoPair(String name) 
+	{
+		Player plyr = getPlayer(name);
+		ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+		
+		if(handInd == null)
+			return false;
+		
+		// Collections.sort(handInd); // sorted out hand indices
+		boolean condition = false;
+		int cnt = 1;
+		// sample card to make sure this is not a 4 of a kind hand
+		Card sampleCard = plyr.getHand().get(handInd.get(0)); 
+		int sampleCardRank = sampleCard.getRankInd();
+		
+		if(handInd.size() == 4) 									//&& handInd.get(0) == handInd.get(1) && handInd.get(2) == handInd.get(3) )
+		{ 		
+				for(int i=1; i<handInd.size(); i++){
+					if(sampleCardRank == plyr.getHand().get(handInd.get(i)).getRankInd())
+						cnt++; // if card rank matches increment cnt
+				}
+				
+			if(cnt == 4) // if we have 4 of a kind then we dont have twoPair 
+				return false;
+				condition = true;
+		}		
+		return condition;
+	}
+	
+	@Override
+	public Card[] getTwoPair(String name) {
+		Player plyr = getPlayer(name);
+		Collections.sort(plyr.getHand());
+		ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+		Card[] hand = new Card[4];
+		
+		if(hasTwoPair(name))
+		{ 
+			//System.out.println(plyr.getName() + " Has two pairs ");
+			int i = 0;
+			for(int index : handInd)
+			{
+				hand[i] = plyr.getHand().get(index);
+				i++; 
+			}
+			
+			return hand; 
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean hasTrips(String name) {
+		Player plyr = getPlayer(name);
+		List<Integer> dupInd = dupRankInd(plyr.getHand());
+		
+		if(dupInd != null && dupInd.size() == 3){			
+			return true;
+		}else
+			return false;		
+	}
+	
+	@Override
+	public Card[] getTrips(String name){
+		Player plyr = getPlayer(name);
+		ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+		Card[] cards = new Card[3]; 
+		int index = 0; 
+		
+		if(hasTrips(name)){
+			//System.out.println(plyr.getName() + " has 3 of a kind!");
+			
+			for(int a : handInd){
+				cards[index] = plyr.getHand().get(a);
+					index++;
+			}
+			return cards;
+		}
+		else			
+			return null;  //returns null in the case player doesn't have three of a kind 
+	}
+		
+	@Override
+	public boolean hasFourOfAKind(String name){
+		Player plyr = getPlayer(name);
+		ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+		
+		if(handInd == null)
+			return false;
+		
+		int cnt = 1;
+		Card sampleCard = plyr.getHand().get(handInd.get(0)); // sample card for testing
+		int rank = sampleCard.getRankInd(); // should be 4 of these
+		
+		if(handInd.size() == 4){
+			//test rankings of cards if match increment cnt 
+			for(int i = 1; i<handInd.size(); i++){
+				if(rank == plyr.getHand().get(handInd.get(i)).getRankInd()){
+					cnt++;
+				}
+				
+			}						
+			// System.out.println("Debug: (hasFourOfAKind()): cnt = " + cnt);
+			if(cnt == 4)
+				return true;
+			else
+				return false;
+		}
+		return false;
+	}
+
+	@Override
+	public Card[] getFourOfAKind(String name) {
+				
+		if(hasFourOfAKind(name)){			
+			Player plyr = getPlayer(name);
+			//System.out.println(plyr.getName() + " has 4 of a kind!");
+			Card[] cards = new Card[4];
+			ArrayList<Integer> handInd = dupRankInd(plyr.getHand());
+			
+			
+			for(int i = 0; i<handInd.size(); i++){
+				cards[i] = plyr.getHand().get(handInd.get(i)); 
+			}return cards; 
+			
+		}else
+			return null;
+	}
+	
+	@Override
+	public boolean hasStraight(String name){
+		Player plyr = getPlayer(name);
+		List<Integer> ranks = getRanksInd(plyr.getHand());
+		Collections.sort(ranks);
+		ArrayList<String> suits = getHandSuits(plyr.getHand());
+		String sample = suits.get(0); // just sample one of the suits to see if there are four more for a flush 
+		boolean flush = true;
+		
+		// logic to check for a flush
+		for(int i = 1; i<suits.size(); i++){
+			if(sample != suits.get(i)){
+				flush = false; // all 5 need to be the same suit
+			}
+		}
+		
+		for(int i = 0; i<ranks.size() - 1; i++){
+			if((ranks.get(i+1) - ranks.get(i)) != 1)
+				return false;
+		} 
+			return true && !flush;
+	}
+	
+	@Override
+	public Card[] getStraight(String name) {
+		if(hasStraight(name)){
+			// System.out.println(name + " has a straight!");
+			ArrayList<Card> hand = getPlayer(name).getHand();
+			Card[] cards = new Card[5];
+			
+			for(int i = 0; i<hand.size(); i++){
+				cards[i] = hand.get(i);
+			}return cards;
+		}
+		else
+			return null;
+	}
+	
+	@Override
+	public boolean hasFlush(String name) {
+		Player plyr = getPlayer(name);
+		ArrayList<String> suits = getHandSuits(plyr.getHand());
+		String sample = suits.get(0); // just sample one of the suits to see if there are four more for a flush 
+		
+		List<Integer> ranks = getRanksInd(getPlayer(name).getHand());
+		Collections.sort(ranks);
+		boolean straight = true;
+		
+		// logic to check for a straight 
+		for(int i = 0; i<ranks.size() - 1; i++){
+			if((ranks.get(i+1) - ranks.get(i)) != 1)
+				straight = false;  //ensures that a flush is not mixed up with a straight flush 
+		}
+		
+		// logic to check for a flush
+		for(int i = 1; i<suits.size(); i++){
+			if(sample != suits.get(i)){
+				return false; // all 5 need to be the same suit
+			}
+		}
+		return true && !straight;
+	}
+	
+	@Override
+	public Card[] getFlush(String name) {
+		if(hasFlush(name)){
+			//System.out.println(getPlayer(name).getName() + " has a flush");
+			ArrayList<Card> hand = new ArrayList<Card>(getPlayer(name).getHand());
+			Card[] cards = new Card[5]; 
+			
+			for(int i = 0; i<hand.size(); i++){
+				cards[i] = hand.get(i);
+			}return cards;
+			
+		}else
+		return null;
+	}
+		
+	@Override
+	public boolean hasFullHouse(String name){
+
+		Player plyr = getPlayer(name);
+		ArrayList<Integer> handRanks = getRanksInd(plyr.getHand());
+		Collections.sort(handRanks);
+		
+		if(handRanks.get(0) == handRanks.get(1) && handRanks.get(0) != handRanks.get(2)){
+			for(int i = 3; i<handRanks.size(); i++){
+				if(handRanks.get(2) != handRanks.get(i))
+					return false;
+			}return true;
+		}
+		else if(handRanks.get(3) == handRanks.get(4) && handRanks.get(3) != handRanks.get(2)){
+			for(int i = 1; i<3; i++){
+				if(handRanks.get(0) != handRanks.get(i))
+					return false;
+			}return true;
+			
+		}return false;
+	}
+	
+	@Override
+	public Card[] getFullHouse(String name){
+		
+		if(hasFullHouse(name)){
+			//System.out.println(name + " has a FullHouse!!");
+			ArrayList<Card> hand = getPlayer(name).getHand();
+			Card[] cards = new Card[5];
+			int cnt = 0;
+			
+			for(Card cd: hand){
+				cards[cnt] = cd;
+				cnt++;
+			}
+			return cards;
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean hasStraightFlush(String name){
+		
+		Player plyr = getPlayer(name);
+		ArrayList<String> suits = getHandSuits(plyr.getHand());
+		List<Integer> ranks = getRanksInd(plyr.getHand());
+		Collections.sort(ranks);
+		String sample = suits.get(0);
+		boolean straight = true;
+		boolean flush = true;
+		
+		// logic to check for a straight 
+		for(int i = 0; i<ranks.size() - 1; i++){
+			if((ranks.get(i+1) - ranks.get(i)) != 1)
+				straight = false;
+		}
+		
+		// logic to check for a flush
+		for(int i = 1; i<suits.size(); i++){
+			if(sample != suits.get(i)){
+				flush = false; // all 5 need to be the same suit
+			}
+		}
+		
+		return straight && flush;
+	}
+	
+	@Override
+	public Card[] getStraightFlush(String name){
+		
+		if(hasStraightFlush(name)){
+			//System.out.println(name + " has a straight flush!");
+			ArrayList<Card> hand = getPlayer(name).getHand();
+			Card[] cards = new Card[5];
+			int cnt = 0;
+			
+			for(Card cd: hand){
+				cards[cnt] = cd;
+				cnt++;
+			}
+			return cards;
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean hasRoyalFlush(String name){
+		Player plyr = getPlayer(name);
+		ArrayList<Integer> ranks = getRanksInd(plyr.getHand());
+		Collections.sort(ranks);
+		ArrayList<String> suits = getHandSuits(plyr.getHand());
+		String sample = suits.get(0);
+		
+		// logic to check for a straight 
+		for(int i = 0; i<ranks.size() - 1; i++){
+			if((ranks.get(i+1) - ranks.get(i)) != 1)
+				return false; 
+		}
+				
+		// logic to check for a flush
+		for(int i = 1; i<suits.size(); i++){
+			if(sample != suits.get(i)){
+				return false;
+			}
+		}		
+		return true;
+	}
+	
+	@Override
+	public Card[] getRoyalFlush(String name) {
+		if(hasRoyalFlush(name)){
+			
+			Player plyr = getPlayer(name);
+			ArrayList<Card> cards = plyr.getHand();
+			Card[] hand = new Card[5];
+			int cnt = 0;
+			
+			for(Card cd: cards){
+				hand[cnt] = cd;
+				cnt++;
+			}
+			return hand;
+		}
+		else
+			return null;
+	}
+
+	protected static ArrayList<Integer> dupRankInd(ArrayList<Card> hand)
+	{/** returns an ArrayList containing indices of cards in hand where there are duplicate ranks
+	  for finding pairs, trips and 4 of a kind)
+	  if trying to iterating through output may throw a NullPointerException*/
+		ArrayList<Integer> ranks = getRanksInd(hand); // ranks of cards in hand
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		int index = 0;
+		int cnt = 0;
+		int tmp = 0;
+
+		// now check for same ranking cards in hand
+		for(int i=0; i<13; i++)
+		{	
+			for(int r : ranks)
+			{
+				if(r == i)
+				{
+					cnt += 1;
+					
+					if(cnt == 1)
+					{
+						tmp = index; // store first match 
+					}				
+					else if(cnt == 2)
+					{	
+						result.add(tmp); 
+						result.add(index); // fills index of matching value					
+					}				
+					else if (cnt > 2)
+					{
+						result.add(index); // fills index of matching value
+					}													
+				}				
+				index += 1;
+			}
+			
+			index = 0;
+			cnt = 0;
+			tmp = 0;
+		}
+		
+		if(result.size() > 1)  // results come in order already
+			return result;
+		else
+			return null;
+	}
+	
+	protected static ArrayList<Integer> getRanksInd(ArrayList<Card> hand){
+		/** returns an ArrayList<Integer> of ranks of Card objects in hand size = 5 */	
+		ArrayList<Integer> ranks = new ArrayList<Integer>(5); // hand but just ranks
+		for(Card c : hand)
+		{
+			ranks.add(c.getRankInd());
+		}	
+		return ranks;
+	}
+		
+	protected static ArrayList<String> getHandSuits(ArrayList<Card> hand){
+		ArrayList<String> suits = new ArrayList<String>();		
+		for(Card cd : hand){
+			suits.add(cd.getSuit());
+		}
+		return suits;
+	}
+	
+	public Player getPlayer(String name){
+		int index = isPlayer(name);
+		return players.get(index);
+	}
+	
+	public Player getPlayer(int index){
+		/** returns player by index
+		 * 
+		 */
+		return players.get(0);
+	}
+	
+	public void namePlayer(String name, int index){
+		/**
+		 * Names player with name at specified index
+		 */
+		players.get(index).name = name;
+	}
+	
+	public void namePlayer(String newName, String originalName){
+		/**
+		 * Names player with OriginalName with newName
+		 */
+		int ind = isPlayer(orignalName);
+		players.get(ind).name = "newName";
+	}
+	
+	// abstract methods
+	public abstract void showHand(String name);
+	
+	public abstract void dealHands();
+	
+	public abstract void findHand(String name);
+	
+	
+	
+	
+	
+	
+	
+	
+}

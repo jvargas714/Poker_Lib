@@ -1,0 +1,154 @@
+-----------------------------------------CLASS: TEXASHOLDEM-------------------------------------------------
+
+
+ * -- At this point we need to find a way to hand all the possible hands the player may have between his/her
+ * 		hole cards and the ones on the table
+ * 
+ * 		>> consider using C(n,k) to find all possible combinations of 7 cards to make a hand
+ * 			** Combinations class has generic method comboNoRep() that can permute the cards
+ * 			^^ implemented still needs to be fully tested with cards and hands 
+ * 
+ * 		>> each hand will have to be processed for a weighted value, best hand out all possible 
+ * 			hands will be the player's hand strength (int) 
+ * 			^^ implemented but still needs testing 
+ * 			^^ consistent for 7 Cards but needs to work
+ * 
+ * -- deal function where each player gets two cards
+ * 		>> needs to be tested 
+ * 			^^ tested on 4/20/15
+ * 			^^ checks good 
+ * 
+ * -- showHand method will just print to screen a players hand (mainly for debugging) 
+ * 		>> needs to be tested
+ * 			^^ tested 4/20/15 
+ * 			^^ checks good 
+ * 
+ * -- need AI bot logic for playing against the cpu
+ * 
+ * -- needs reset method to reset pot, cards, ect ect
+ * 	^^ complete see TexasHoldem.reset() 
+ * 
+ * -- implement GUI
+ * 
+ * -- need ability to check
+ * 		>> checking is simply betting $0
+ * 
+ * -- need state machine to go through a hand cylce to include checking, folding, blinds, ect ect..... 
+ * 
+ * -- go through classes and encapsulate data Set fields to private, use setters getters, resuse code ect ect....
+ * 
+ * -- award money to winner of pot 
+ * 
+ * -- add raising functionality
+ * 		>> add this in with the GUI class 
+ * 
+ * -- need to update findWinner()
+ * 		-- this method needs to be updated and fixed for tie situations 	  
+ 
+ * 		-- should also return name of winner instead of a boolean  
+ 
+  		-- Note if there is a tie the players.bestHand should be compared for a high card
+  			-- in a tie the highest card in hand wins 
+  			-- if both highest cards are community cards then results in a tie 	
+  	
+  	
+  			
+-------------------------CLASS: POKER------------------------------------		
+ /** General Poker game abstraction based on five card hands
+ * TODO:need to finish implementing the following--> 
+ * haspair -- done tested 
+ * getpair -- done tested  
+ * hastrips -- done tested 
+ * gettrips -- done tested 
+ * gettwoPair -- done tested 
+ * hastwopair -- done tested 
+ * has4ofkind -- done  tested 
+ * get4ofkind -- done  tested 
+ * hasstraignt --  done tested 
+ * getstraight --  done tested 
+ * hasfullhouse -- done tested 
+ * getfullhouse -- done tested 
+ * getroyal --  done tested 
+ * hasroyal --  done tested 
+ * hasstrgtflush  -- done tested 
+ * getstrtflush -- done tested 
+ * getflush -- done tested 
+ * hasflush -- done tested Note: flush is favored over a straight
+ *     
+ *     
+ * CHANGES NEED TO BE MADE: 
+ * 	1. alter code to reflect Card implementation of the Comparable interface (i.e., sort by Collections.sort(cards)
+
+ 
+ 
+ __________________________________POKER_GUI________________________________
+ -- See using KeyFrame and ActionEvent for animations 
+ -- see Interface Executor for executing Runnables (threads) 
+ 
+ _____________________________Notes on Java FX____________________
+ Stage -- top level container that holds scenes 
+
+ Scene -- a container for items that comprise the scene
+ 			** can consist of controls, buttons, switches, boxes, graphics 
+
+Nodes -- individual elements of a scene are called nodes
+		** a node can consist of groups of nodes, a node can have a child node 
+		** nodes without children are terminal nodes and called leaves 
+		** collection of all nodes in a scene are called scene graph which
+			comprises a tree 
+		** one special node called the root node (top level node)
+		** Base class for all nodes is Node 
+			* subclasses of Node: 
+				^ Parent, Group, Region, and Control and more 
+
+Layouts -- scene layouts that manage the process of placing elements in scene 
+		** FlowPane class provides a flow layout and the GridPane class supports a 
+			row/column grid based layout 
+		-- layouts are packaged in javafx.scene.layout 
+
+Application Class and the Life Cycle Methods
+	- javafx app must be a subclass of the Application class javafx.application.Application 
+	- defines 3 life cycle methods void init(), abstract void start(), and void stop() 
+	
+Launching a JavaFX Application:
+	-- must call the launch() method defined by Application. 
+
+
+// A JavaFX application skeleton.
+see Java complete ref 9th edition 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	-- 

@@ -1,0 +1,394 @@
+package poker;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+ 
+public class TexasHoldem extends Poker implements Serializable
+{
+	
+	private static final long serialVersionUID = 1L;
+	public List<Card> tableCards = new ArrayList<Card>();
+	private int pot = 0;
+	private int smallBlind, bigBlind;
+	
+	
+	public TexasHoldem(int smallBlind, int bigBlind)
+	{
+		super();
+		this.smallBlind = smallBlind;
+		this.bigBlind = bigBlind;
+		System.out.println("---------------Welcome!!!---------------- \nNew Texas Holdem Game Created!!!");
+		System.out.println("Small Blind: " + smallBlind + "\nBig Blind: " + bigBlind + "\n");
+		enterGame("Player 1");
+		enterGame("Player 2");
+	}
+	
+	@Override
+	public void dealHands(){
+		/**
+		 * Deals 2 cards to each player in the game
+		 * the card dealt is removed from the game deck
+		 */
+		
+		for(Player plyr: players){
+			for(int i = 0; i<2; i++){
+				Card card = gameDeck.dealCard();
+				plyr.getHand().add(card);
+			}
+		}
+	}
+	
+	public void changeBlinds(int sm, int big){
+		smallBlind = sm;
+		bigBlind = big;
+		System.out.println("Blinds have been changed to " + smallBlind + " and " + 
+																			bigBlind);
+	}
+	
+	public void dealFlop(){
+		// burn and deal the flop
+		gameDeck.dealCard(); 
+		
+		for(int i = 0; i<3; i++){
+			tableCards.add(gameDeck.dealCard());
+		}
+		
+		System.out.println("Flop has been dealt!!");
+		showTableCards();
+	}
+	
+	public void dealTurn(){
+		// burn card and deal
+		gameDeck.dealCard();
+		
+		Card cd = gameDeck.dealCard();
+		tableCards.add(cd);
+		
+		System.out.println("Turn has been dealt! ");
+		showTableCards();
+
+	}
+	
+	public void dealRiver(){
+		gameDeck.dealCard();
+		
+		Card cd = gameDeck.dealCard();
+		tableCards.add(cd);
+		System.out.println("River has been dealt!! ");
+		showTableCards();
+
+	}
+	
+	@Override
+	public void showHand(String name) {
+		/*
+		 * Prints hand to console
+		 */
+		
+		Player plyr = getPlayer(name);
+		System.out.println(name + "'s" + " Cards: ");
+		
+		for(Card cd: plyr.getHand()){
+			System.out.print(cd + " ");
+		}System.out.println("\n");
+	}
+	
+	public void showTableCards(){
+		
+		System.out.println("Table Cards: ");
+		
+		for(Card cd: tableCards){
+			System.out.print(cd + "  ");
+		}
+		
+		System.out.println("\n");
+	}
+	
+	public void playerBet(String name, int amt){
+		System.out.println(name + " bet " + "$" + amt);
+		this.pot += getPlayer(name).bet(amt);
+		System.out.println("Pot size: " + "$" + pot + "\n");
+	}
+	
+	public void betSmallBlind(String name){		
+		System.out.println(name + " small blind bet " + "$" + smallBlind);
+	    this.pot += getPlayer(name).bet(smallBlind);
+		System.out.println("Pot size: " + "$" + pot + "\n");
+	}
+	
+	public void betBigBlind(String name){
+		System.out.println(name + " big blind bet " + "$" + bigBlind);
+		this.pot += getPlayer(name).bet(bigBlind);
+		System.out.println("Pot size: " + "$" + pot + "\n");
+	}
+	
+	private int getHandWeight(String name){
+		String handType;
+		int handRank;
+		Player plyr = getPlayer(name);
+		
+		Card[] royalFlush = getRoyalFlush(name);
+		Card[] straightFlush = getStraightFlush(name);
+		Card[] fourOfAKind = getFourOfAKind(name);
+		Card[] fullHouse = getFullHouse(name);
+		Card[] flush = getFlush(name);
+		Card[] straight = getStraight(name);
+		Card[] trips = getTrips(name);
+		Card[] twoPair = getTwoPair(name);
+		Card[] pair = getPair(name);
+		
+		if(royalFlush != null){
+			handType = "royalFlush";
+			handRank = 0;
+		}
+		else if(straightFlush != null){
+			handType = "straightFlush";
+			
+			int largest = 0;
+			
+			for(Card cd: straightFlush){
+				int tmp = cd.getRankInd();
+				
+				if(tmp > largest)
+					largest = tmp;
+			}
+			handRank = largest;
+		}
+		else if(fourOfAKind != null){
+			handType = "fourOfAKind";
+			handRank = fourOfAKind[1].getRankInd();
+		}
+		else if(fullHouse != null){
+			// need to fix this one need rank index of the trips
+			handType = "fullHouse";
+			handRank = 122; 
+			
+			for(Card cd: fullHouse){
+				
+				if(count(fullHouse, cd) == 3){
+					handRank = cd.getRankInd();
+					break;
+				}					
+			}
+			
+			
+					
+		}
+		else if(flush != null){
+			handType = "flush";
+			plyr.sortHand();
+			
+			int largest = 0;
+			
+			for(Card cd: flush){
+				int tmp = cd.getRankInd();
+				
+				if(tmp > largest)
+					largest = tmp;
+			}
+			handRank = largest;
+		}
+		else if(straight != null){
+			handType = "straight";
+			plyr.sortHand();
+			int largest = 0;
+			
+			for(Card cd: straight){
+				int tmp = cd.getRankInd();
+				
+				if(tmp > largest)
+					largest = tmp;
+			}
+			handRank = largest;
+		}
+		else if(trips != null){
+			handType = "trips";
+			handRank = trips[0].getRankInd();
+		}
+		else if(twoPair != null){
+			handType = "twoPair";
+			handRank = twoPair[3].getRankInd();
+		}
+		else if(pair != null){
+			handType = "pair";
+			handRank = pair[0].getRankInd();
+		}
+		else{
+			handType = "high";
+			plyr.sortHand();
+			handRank = plyr.getHand().get(4).getRankInd();
+		}
+		
+		int weight = plyr.findWeight(handType, handRank);
+		
+		return weight;
+		
+	}
+	
+	@Override
+	public void findHand(String name){
+		/*Description:
+		 * 1. identifies player by name 
+		 * 2. copies hole cards 
+		 * 3. creates ArrayList of 7 Cards 2 hole cards and 5 table cards 
+		 * 4. creates Set<Set>> of cards where inner set is 5 cards (will hold 21 possible hands)
+		 * 5. from set will find the best hand and assign a int weight to player's handStrength by looping through
+		 */
+		
+		Player plyr = getPlayer(name);
+		
+		// copies hole cards and clears hand
+		ArrayList<Card> holeCards = new ArrayList<Card>(plyr.getHand()); 
+		plyr.clearHand();
+		
+		// fill allCards with 7 cards 
+		ArrayList<Card> allCards = new ArrayList<Card>(holeCards);
+		
+		for(Card cd: tableCards){
+			allCards.add(cd);
+		}
+		
+		try { // finds strongest hand out of possible 21 hands and sets handStrength of player
+			Set<Set<Card>> cardCombos = Combinations.comboNoRep(allCards, 5, 7, 1, new HashSet<Set<Card>>(), 0);
+			int weight = 0; 			
+			for(Set<Card> cardSet: cardCombos){
+				plyr.setHand(new ArrayList<Card>(cardSet));								
+				int tmp = getHandWeight(name);				
+				if(tmp > weight){
+					weight = tmp;
+					plyr.setBestHand(plyr.getHand());
+				}
+			}
+			plyr.setHandStrength(weight);
+			//Debug output to console 
+			System.out.println(name + " has a " + plyr.findHandType(weight) + " has a hand strength of " + plyr.getHandStrength() + "\n");
+			plyr.getHand().clear();
+			plyr.setHand(holeCards);
+			
+		} 
+		
+		catch (Exception e){
+			e.printStackTrace();
+		}		
+	}
+	
+	public void reset(){
+		/**
+		 * Resets game for another hand to be played
+		 */
+		pot = 0;
+		tableCards.clear();
+		gameDeck.resetDeck();
+
+		
+		for(Player plyr: players){
+			plyr.clearHand();
+			plyr.clearHandStrength();
+		}		
+	}
+	
+	public void setBlinds(int small, int big){
+		this.smallBlind = small;
+		this.bigBlind   = big;
+	}
+	
+	private static int count(Card[] lst, Card card){
+		
+		int cnt = 0;
+		
+		for(Card cd: lst){
+			
+			if(cd.compareTo(card) == 0)
+				cnt++;
+		}
+		
+		return cnt;
+	}
+	
+	public boolean findWinner(){
+		
+		
+		List<Player> highestPlayers = new ArrayList<Player>();
+		boolean tie = false;
+		
+		//sort players by hand strength ascending
+		Collections.sort(players, new handComparator());
+		Player winner;
+		highestPlayers.add( players.get(numPlayers-1) );
+		int bestHandStrength = players.get(numPlayers-1).getHandStrength();
+		
+		// [ . . . . . W]
+		if(numPlayers == 2){
+			// in the case we only have two players check for a tie here instead
+			if(players.get(0).getHandStrength() == bestHandStrength)
+				highestPlayers.add( players.get(0) );
+		}
+		else{
+		
+			for(int i = numPlayers-2; i>0; i--){
+				if(players.get(i).getHandStrength() == bestHandStrength)
+					highestPlayers.add(players.get(i));
+			}
+		}
+		
+		// check to see if a tie exist 
+		if(highestPlayers.size() == 1){
+			winner = highestPlayers.get(0);
+		}
+		else{
+			// since tie exist we must now find how many ppl are involved in the tie and break 
+		    tie = true;
+			winner = highestPlayers.get(0);
+			// maybe at this point sort them by there high cards 
+			for(int i = 1; i<highestPlayers.size(); i++){
+				
+				Collections.sort( highestPlayers.get(i).getHand() );
+				Card highCard = highestPlayers.get(i).getHand().get(1);
+				
+				if(highCard.compareTo( winner.getHand().get(1) ) > 0)
+					winner = highestPlayers.get(i);
+				
+				if(highCard.compareTo(winner.getHand().get(1)) == 0){
+					System.out.println("we have a tie no winner!!");
+					System.out.println("Pot will be split :(");
+					return false;
+				}	
+			}	
+		}
+		
+		if(tie)
+			System.out.println(winner.getName() + " has won the hand with a " + winner.findHandType(winner.getHandStrength()) + 
+					" with a high card of " + winner.getHand().get(1));
+		else
+			System.out.println(winner.getName() + " has won the hand with a " + winner.findHandType(winner.getHandStrength())); 
+			
+		return true;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

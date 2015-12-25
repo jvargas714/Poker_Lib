@@ -1,0 +1,51 @@
+package poker;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+
+public class Bot extends Player implements BotAI {
+	
+	private static HashMap<String, Double> preFlopProbabilities;
+	private static HashMap<String, Double> flopProbabilities;
+	private static HashMap<String, Double> turnProbabilities;
+	private static HashMap<String, Double> riverProbabilities;
+	static{
+		 preFlopProbabilities = new HashMap<String, Double>();
+		 preFlopProbabilities.put("pocketPair" , .059);
+		 preFlopProbabilities.put("pocketAce"  , .0045);
+		 preFlopProbabilities.put("premiumHand",.021);		// pair aces, picture pairs, or AK suited
+		 preFlopProbabilities.put("suitedJackOrBetter", .0181);
+		 preFlopProbabilities.put("twoSuitedCards", .24);
+		 
+		 
+		 flopProbabilities = new HashMap<String, Double>();
+		 turnProbabilities = new HashMap<String, Double>();	
+		 riverProbabilities = new HashMap<String, Double>();
+	}	
+	
+	protected String handType;
+	protected int aggression; 				// on a scale from 0 - 100
+	protected int bluff;					// on a scale form 0 - 100
+	
+	public Bot(String name, int cash, int agres, int bluf) {
+		// TODO: init maps here as well
+		super(name, cash);
+		aggression = bluf;
+		bluff = bluf;		
+	}
+	
+	@Override
+	public void assessTablePreFlop(TexasHoldem game){
+		// method to assess the table cards out on the table
+		// will inform the Bot on how to act
+		List<Card> tableCards = new ArrayList<Card>( game.tableCards );
+		List<Card> holeCards  = new ArrayList<Card>( this.hand );
+		
+		if( holeCards.get(0) == holeCards.get(1) ){
+			// player has a pre-flop pair
+			
+		}
+		
+	}
+
+}

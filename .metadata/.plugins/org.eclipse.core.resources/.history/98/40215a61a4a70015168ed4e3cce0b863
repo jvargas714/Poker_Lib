@@ -1,0 +1,6 @@
+package poker;
+
+public interface BotAI {
+	
+	void assessTablePreFlop(TexasHoldem game);
+}

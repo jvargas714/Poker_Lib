@@ -1,0 +1,36 @@
+JLabel -- allows to output text and images to screen 
+
+public class tuna extends JFrame {
+// JFrame gives us a windows menu ect 
+
+	private JLabel item1; 
+	
+	public tuna(){
+	
+		super("the title Bar");
+		setLayOut(new FlowLayout()); 
+		
+		item1 = new Jlabel("this is a sentence");
+		item1.setToolTipText("this will show on hover");
+		add(item1);
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////
+
+import javax.swing.JFrame;
+
+class apples {
+
+	public static void main(String[] args){
+		
+		tuna bucky = new tuna();
+		bucky.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		bucky.setSize(275, 180); 
+		bucky.setVisible(true); 
+	
+	}
+
+}

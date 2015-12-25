@@ -1,0 +1,127 @@
+package poker;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.io.Serializable;
+
+public class Player  extends WeightOfHand implements Comparable<Player>, Serializable
+{	
+	@Override
+	public String toString() {
+		return "Player [cash=" + cash + ", " + (name != null ? "name=" + name + ", " : "")
+				+ (hand != null ? "hand=" + hand + ", " : "") + (bestHand != null ? "bestHand=" + bestHand + ", " : "")
+				+ "handStrength=" + handStrength + "]";
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// implement comparable by hand strength
+	// when sorting list of players they will be arranged according to their hand strength ascending 
+	
+	private int cash;
+	protected String name;
+	protected ArrayList<Card> hand = new ArrayList<Card>(2);
+	protected ArrayList<Card> bestHand = new ArrayList<Card>(5);  // holds best hand after weights have been calculated
+	private int handStrength;
+	
+	public Player(String name, int cash)
+	{
+		super();  //creates weight object
+		this.name = name;
+		this.cash = cash;
+		this.setHandStrength(0);
+	}
+		
+	public void setCash(int amount)
+	{
+		cash = amount;
+	}
+	
+	public void sortHand(){
+		Collections.sort(hand);
+	}
+	
+	public void setHand(ArrayList<Card> cards){
+		hand = cards;
+	}
+		
+	public void namePlayer(String name)
+	{
+		String originalName = this.name;
+		this.name = name;
+		
+		System.out.println(originalName + " Was named to " + this.name + "\n");
+	}
+		
+	protected int bet(int amt)
+	{
+		this.cash -= amt;
+		//System.out.println(name + " bet " + "$"+ amt + "\n");
+		System.out.println(name + "s" + " remaining balance: " + "$" + cash);
+		return amt;	
+	}
+		
+	protected void collectPot(int amt)
+	{
+		cash += amt ;
+	}
+
+	protected void setBestHand(ArrayList<Card> cards){
+		bestHand = cards;
+	}
+
+	@Override
+	public int findWeight(String hand, int rank) 
+	{/**String hand will actually be the string name of the hand, this will serve as the key for 
+		the hashTable for looking up the proper score*/		
+		return weights.get(hand)[rank];
+	}
+	
+	public void setHandStrength(int weight){
+		handStrength = weight;
+	}
+	
+	public int getCash(){
+		return cash;
+	}
+	
+	public int getHandStrength(){
+		return handStrength;
+	}
+	
+	public ArrayList<Card> getHand()
+	{
+		return hand; 
+	}
+	
+	public String getName()
+	{
+		return name; 
+	}
+	
+	public void clearHand(){
+		hand.clear();
+	}
+	
+	@Override
+	public int compareTo(Player plyr) {
+		
+		final int less = -1;
+		final int equal = 0; 
+		final int more = 1;
+		
+		if(this.handStrength == plyr.handStrength) return equal;
+		if(this.handStrength > plyr.handStrength) return more;
+		if(this.handStrength < plyr.handStrength) return less;
+	
+		return 0;
+	}
+	
+	public void clearHandStrength(){
+		handStrength = 0;
+	}
+
+	
+}

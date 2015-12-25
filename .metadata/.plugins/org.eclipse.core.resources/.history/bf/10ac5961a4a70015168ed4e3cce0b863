@@ -1,0 +1,90 @@
+package poker;
+
+public class Tester {
+	/**
+	 * Runs through various stages of a game and tests methods 
+	 */
+	
+
+	public static void main(String[] args) {
+		
+	 TexasHoldem game = new TexasHoldem(50, 100);
+	 game.enterGame("Dave", 1500);
+	 game.enterGame("Tom", 1500);
+	 game.enterGame("Oscar", 1500);
+	 game.enterGame("Can", 1500);
+	 
+	 for(int i = 1 ; i<=2; i++){
+	 // deal cards to players
+	 game.dealHands(); 
+	 System.out.println("\n Hand #: " + i + "==================Cards Dealt Out==============");
+	 game.showHand("Dave");
+	 game.showHand("Tom");
+	 game.showHand("Jay");
+	 game.showHand("Kelsey");
+	 game.showHand("Oscar");
+	 game.showHand("Can");
+	 
+	 System.out.println("Cards Left: " + game.gameDeck.numCardsLeft());
+	 
+	 
+	 
+	 // Players make small blind bets
+	 System.out.println("\n************Small Blinds************");
+	 game.betSmallBlind("Dave");
+	 game.betSmallBlind("Tom");
+	 game.betSmallBlind("Oscar");
+	 game.betSmallBlind("Can");
+	 game.betSmallBlind("Kelsey");
+	 game.betSmallBlind("Jay");
+	 
+	 
+	 
+	// Players make big blind bets
+	 System.out.println("\n*************Big Blinds*************");
+	 game.betBigBlind("Dave");
+	 game.betBigBlind("Tom");
+	 game.betBigBlind("Oscar");
+	 game.betBigBlind("Can");
+	 game.betBigBlind("Kelsey");
+	 game.betBigBlind("Jay");
+	 
+	 
+	 
+	 // Deal table Cards
+	 System.out.println("\n*************Table Cards Being Dealt*************");
+
+	 game.dealFlop();
+	 game.dealTurn();
+	 game.dealRiver();
+	 	 
+	 System.out.println("\n*************Showing Hands******************");
+	 game.showHand("Dave");
+	 game.showHand("Tom");
+	 game.showHand("Jay");
+	 game.showHand("Kelsey");
+	 game.showHand("Oscar");
+	 game.showHand("Can");
+	 
+	 
+	 // players find their weights and winner is found
+	 System.out.println("\n*************Finding Weights******************");
+	 game.findHand("Jay");
+	 game.findHand("Kelsey");
+	 game.findHand("Tom");
+	 game.findHand("Dave");
+	 game.findHand("Can");
+	 game.findHand("Oscar");
+	 
+	 System.out.println("\n*************Finding a Winner*************");
+	 
+	 // finding a winner
+	 game.findWinner();
+	 
+	 game.reset();
+		
+		}  // end for loop for multiple hands played 
+						
+	}
+
+}
